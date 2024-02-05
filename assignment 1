@@ -1,0 +1,31 @@
+import requests
+from bs4 import BeautifulSoup
+import json
+import time
+
+data = []
+page_url = "https://www.xpress.jobs/jobs?page=1"
+input_number = int(input("enter number of pages"))
+for current_page in range(0,input_number):
+   page = requests.get(page_url, headers={'User-agent': 'Sorry, learning Python!'})
+   page_html = page.content
+   soup = BeautifulSoup(page_html, "html.parser")
+
+
+   titles = soup.find_all('h3', 'job_listing-title')
+   companies = soup.find_all('div', 'job_listing-company')
+   descriptions = soup.find_all('div', 'job_listing-overview')
+
+   for title, company, description in zip(titles, companies, descriptions):
+        data_item = {
+                     "title": title.text.strip(),
+                     "company": company.text.strip(),
+                     "description": description.text.strip()
+        }
+        data.append(data_item)
+   next_page_url = soup.find('a',class_='page-numbers next').get('href')
+   page_url = f'https://www.xpress.jobs{next_page_url}'
+   time.sleep(2)
+
+json_output = json.dumps(data, indent=3)
+print(json_output)
